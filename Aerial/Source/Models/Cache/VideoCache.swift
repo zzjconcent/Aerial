@@ -35,7 +35,7 @@ class VideoCache {
                 }
                 
                 let userCacheDirectory = cachePaths[0] as NSString
-                let defaultCacheDirectory = userCacheDirectory.appendingPathComponent("Aerial")
+                let defaultCacheDirectory = userCacheDirectory.appendingPathComponent("Huff")
                 
                 cacheDirectory = defaultCacheDirectory
             }

@@ -23,7 +23,7 @@ class Preferences {
     static let sharedInstance = Preferences()
     
     lazy var userDefaults: UserDefaults = {
-        let module = "com.JohnCoates.Aerial"
+        let module = "life.cod.Aerial"
         
         guard let userDefaults = ScreenSaverDefaults(forModuleWithName: module) else {
             print("Couldn't create ScreenSaverDefaults, creating generic UserDefaults")

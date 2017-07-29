@@ -165,9 +165,7 @@ class AerialView: ScreenSaverView {
         
         AerialView.singlePlayerAlreadySetup = true
         
-        ManifestLoader.instance.addCallback { videos in
-            self.playNextVideo()
-        }
+        self.playNextVideo()
     }
     
     // MARK: - AVPlayerItem Notifications
@@ -196,6 +194,42 @@ class AerialView: ScreenSaverView {
     
     // MARK: - Playing Videos
     
+    func randomVideo() -> AerialVideo? {
+        var videos = [AerialVideo]()
+        let documentsUrl = URL(fileURLWithPath: VideoCache.cacheDirectory!);
+        do {
+            let directoryContents = try FileManager.default.contentsOfDirectory(at: documentsUrl, includingPropertiesForKeys: nil, options: [])
+            
+            // if you want to filter the directory contents you can do like this:
+            let mp3Files = directoryContents.filter{ $0.pathExtension == "mov" }
+            _ = mp3Files.map{ $0.deletingPathExtension().lastPathComponent }
+            for file in mp3Files {
+                let name = file.deletingPathExtension().lastPathComponent
+                let video = AerialVideo(id: "", name: name, type: "mov", timeOfDay: "tod", url: file.path);
+                videos.append(video)
+            }
+        } catch let error as NSError {
+            print(error.localizedDescription)
+        }
+        
+        let preferences = Preferences.sharedInstance
+        
+        let shuffled = videos.shuffled()
+        for video in shuffled {
+            let inRotation = preferences.videoIsInRotation(videoID: video.id)
+            
+            if !inRotation {
+                debugLog("video is disabled: \(video)")
+                continue
+            }
+            
+            return video
+        }
+        
+        // nothing available??? return first thing we find
+        return shuffled.first
+    }
+    
     func playNextVideo() {
         let notificationCenter = NotificationCenter.default
         
@@ -221,7 +255,7 @@ class AerialView: ScreenSaverView {
             AerialView.previewView?.playerLayer.player = self.player
         }
         
-        let randomVideo = ManifestLoader.instance.randomVideo()
+        let randomVideo = self.randomVideo()
         
         guard let video = randomVideo else {
             NSLog("Aerial: Error grabbing random video!")
@@ -230,7 +264,7 @@ class AerialView: ScreenSaverView {
         let videoURL = video.url
         
         let asset = CachedOrCachingAsset(videoURL)
-//        let asset = AVAsset(URL: videoURL)
+//        let asset = AVAsset(url: videoURL)
         
         let item = AVPlayerItem(asset: asset)
         
