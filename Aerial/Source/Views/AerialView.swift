@@ -41,6 +41,7 @@ class AerialView: ScreenSaverView {
                 }
 
                 _player = AVPlayer()
+                _player!.volume = 0;
                 return _player!
             }
         }
@@ -141,7 +142,8 @@ class AerialView: ScreenSaverView {
                 localPlayer = AVPlayer()
             }
         }
-        
+        localPlayer!.volume = 0
+
         guard let player = localPlayer else {
             NSLog("Aerial Error: Couldn't create AVPlayer!")
             return
@@ -237,6 +239,7 @@ class AerialView: ScreenSaverView {
         notificationCenter.removeObserver(self)
         
         let player = AVPlayer()
+        player.volume = 0
         // play another video
         let oldPlayer = self.player
         self.player = player

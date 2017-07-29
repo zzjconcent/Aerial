@@ -74,13 +74,14 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        
+        self.player.volume = 0
         if let previewPlayer = AerialView.previewPlayer {
             self.player = previewPlayer
         }
         
         outlineView.floatsGroupRows = false
         
+        player.volume = 0
         playerView.player = player
         playerView.controlsStyle = .none
         if #available(OSX 10.10, *) {
@@ -325,6 +326,7 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
         switch item {
         case is AerialVideo:
             player = AVPlayer()
+            player.volume = 0
             playerView.player = player
             
             let video = item as! AerialVideo
