@@ -18,7 +18,7 @@ class TimeOfDay {
     init(title: String) {
         self.title = title
     }
-    
+
 }
 
 class City {
@@ -50,7 +50,6 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
     @IBOutlet var differentAerialCheckbox: NSButton!
     @IBOutlet var projectPageLink: NSButton!
     @IBOutlet var cacheLocation: NSPathControl!
-    @IBOutlet var cacheAerialsAsTheyPlayCheckbox: NSButton!
     
     var player: AVPlayer = AVPlayer()
     
@@ -92,10 +91,6 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
             differentAerialCheckbox.state = NSOnState
         }
         
-        if !preferences.cacheAerials {
-            cacheAerialsAsTheyPlayCheckbox.state = NSOffState
-        }
-        
         colorizeProjectPageLink()
         
         if let cacheDirectory = VideoCache.cacheDirectory {
@@ -118,13 +113,6 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
     }
     
     // MARK: - Preferences
-    
-    @IBAction func cacheAerialsAsTheyPlayClick(_ button: NSButton!) {
-        debugLog("cache aerials as they play: \(button.state)")
-        
-        let onState = (button.state == NSOnState)
-        preferences.cacheAerials = onState
-    }
     
     @IBAction func userSetCacheLocation(_ button: NSButton?) {
         let openPanel = NSOpenPanel()
@@ -193,6 +181,47 @@ NSOutlineViewDelegate/*, VideoDownloadDelegate*/ {
         
         outlineView.reloadData()
     }
+    
+    @IBAction func importCustomVideo(_ sender: NSButton) {
+        
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.allowsMultipleSelection = true
+        panel.title = "Import one or more files or directories."
+        panel.prompt = "Choose"
+        
+        panel.begin { result in
+            if result == NSFileHandlingPanelOKButton {
+                let fileManager = FileManager.default
+                let urls = panel.urls
+                for url in urls {
+                    let desurl = URL(fileURLWithPath:VideoCache.cachePath(forFilename: url.lastPathComponent)!)
+                    do {
+                        try fileManager.removeItem(at: desurl)
+                        try fileManager.copyItem(at: url, to: desurl)
+                        self.loadVideo()
+                    } catch let error {
+                        NSLog("Can't copy file:\(error)")
+                    }
+                }
+            }
+        }
+    }
+    
+    @IBAction func deleteCustomVideo(_ sender: NSButton) {
+        guard self.outlineView.selectedRow >= 0 else {
+            return
+        }
+        let video = self.videos![self.outlineView.selectedRow]
+        let fileManager = FileManager.default
+        do {
+            try fileManager.removeItem(at: URL(fileURLWithPath:video.url.absoluteString))
+            self.loadVideo()
+        } catch let error {
+            NSLog("Can't remove file:\(error)")
+        }
+    }
+    
     
     @IBAction func differentAerialsOnEachDisplayCheckClick(_ button: NSButton?) {
         let state = differentAerialCheckbox.state

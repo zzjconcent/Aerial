@@ -138,12 +138,6 @@ class VideoCache {
     }
     
     func saveCachedVideo() {
-        let preferences = Preferences.sharedInstance
-        
-        guard preferences.cacheAerials else {
-            debugLog("Cache disabled, not saving video")
-            return
-        }
         
         let fileManager = FileManager.default
         
